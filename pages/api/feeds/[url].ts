@@ -32,7 +32,7 @@ export default async function handler(
         },
       });
 
-      const items = await database.item.createMany({
+      await database.item.createMany({
         data: rawFeed.items.map((item) => ({
           itemId: item.guid as string,
           label: item.title || "",
