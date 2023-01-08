@@ -7,52 +7,72 @@ export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
-  if (request.method === "POST") {
-    const { url } = request.body;
+  const token =
+    request.headers.authorization &&
+    request.headers.authorization.split("Bearer ")[1];
 
-    if (!url) {
-      return response
-        .status(400)
-        .json({ message: "You need to specify a URL" });
-    }
+  try {
+    const user: User | null = jwt.verify(
+      token as string,
+      process.env.JWT_SECRET as string
+    ) as User | null;
 
-    const token =
-      request.headers.authorization &&
-      request.headers.authorization.split("Bearer ")[1];
+    if (user) {
+      if (request.method === "POST") {
+        const { url } = request.body;
 
-    try {
-      const user: User | null = jwt.verify(
-        token as string,
-        process.env.JWT_SECRET as string
-      ) as User | null;
+        if (!url) {
+          return response
+            .status(400)
+            .json({ message: "You need to specify a URL" });
+        }
 
-      if (user) {
-        await database.usersFeeds.create({
-          data: {
-            feed: {
-              connect: {
-                url,
+        try {
+          await database.usersFeeds.create({
+            data: {
+              feed: {
+                connect: {
+                  url,
+                },
+              },
+              user: {
+                connect: {
+                  id: user.id,
+                },
               },
             },
-            user: {
-              connect: {
-                id: user.id,
+          });
+
+          return response.json({});
+        } catch (error) {
+          console.error(error);
+          response.status(500).json({ message: "Something wrong happened" });
+        }
+      } else if (request.method === "GET") {
+        const items = await database.item.findMany({
+          where: {
+            subscriptions: {
+              some: {
+                AND: {
+                  readAt: null,
+                  userId: user.id,
+                },
               },
             },
           },
         });
 
-        return response.json({});
+        return response.json(items);
       } else {
-        response.status(401).json({
-          message: "You need to be authentified to subscribe to a feed",
-        });
+        response.status(405).json({ message: "Wrong method" });
       }
-    } catch (error) {
-      console.error(error);
-      response.status(500).json({ message: "Something wrong happened" });
+    } else {
+      response.status(401).json({
+        message: "You need to be authentified to subscribe to a feed",
+      });
     }
-  } else {
-    response.status(405).json({ message: "Wrong method" });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ message: "Something wrong happened" });
   }
 }

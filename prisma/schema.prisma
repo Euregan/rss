@@ -44,26 +44,26 @@ model Feed {
 }
 
 model UsersItems {
-  user   User     @relation(fields: [userId], references: [id])
+  user   User      @relation(fields: [userId], references: [id])
   userId String
-  item   Item     @relation(fields: [itemId], references: [id])
+  item   Item      @relation(fields: [itemId], references: [id])
   itemId String
-  readAt DateTime
+  readAt DateTime?
 
   @@id([userId, itemId])
 }
 
 model Item {
-  id          String       @id @default(cuid())
-  itemId      String // This is unique within a feed
-  label       String
-  link        String?
-  description String?
-  picture     String?
-  publishedAt DateTime
-  feedId      String
-  feed        Feed         @relation(fields: [feedId], references: [id])
-  reads       UsersItems[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id            String       @id @default(cuid())
+  itemId        String // This is unique within a feed
+  label         String
+  link          String?
+  description   String?
+  picture       String?
+  publishedAt   DateTime
+  feedId        String
+  feed          Feed         @relation(fields: [feedId], references: [id])
+  subscriptions UsersItems[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
