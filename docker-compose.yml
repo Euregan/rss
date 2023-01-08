@@ -1,0 +1,36 @@
+version: "3.6"
+
+services:
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: rss
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rss
+      PGPASSWORD: root
+    ports:
+      - 5432:5432
+
+  app:
+    image: node:16
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app
+    ports:
+      - 3000:3000
+    environment:
+      DATABASE_URL: postgresql://rss:password@db:5432/rss
+    command: npm run dev
+
+  prisma-studio:
+    image: node:16
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app
+    ports:
+      - 5555:5555
+    environment:
+      DATABASE_URL: postgresql://rss:password@db:5432/rss
+    command: npx prisma studio
