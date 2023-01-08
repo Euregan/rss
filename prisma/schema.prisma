@@ -11,9 +11,59 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String       @id @default(cuid())
+  email         String       @unique
+  password      String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  subscriptions UsersFeeds[]
+  readItems     UsersItems[]
+}
+
+model UsersFeeds {
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  feed         Feed     @relation(fields: [feedId], references: [id])
+  feedId       String
+  subscribedAt DateTime @default(now())
+
+  @@id([userId, feedId])
+}
+
+model Feed {
+  id            String       @id @default(cuid())
+  url           String       @unique
+  label         String
+  link          String?
+  picture       String?
+  lastUpdated   DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  items         Item[]
+  subscriptions UsersFeeds[]
+}
+
+model UsersItems {
+  user   User     @relation(fields: [userId], references: [id])
+  userId String
+  item   Item     @relation(fields: [itemId], references: [id])
+  itemId String
+  readAt DateTime
+
+  @@id([userId, itemId])
+}
+
+model Item {
+  id          String       @id @default(cuid())
+  itemId      String // This is unique within a feed
+  label       String
+  link        String?
+  description String?
+  picture     String?
+  publishedAt DateTime
+  feedId      String
+  feed        Feed         @relation(fields: [feedId], references: [id])
+  reads       UsersItems[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }

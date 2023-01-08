@@ -1,6 +1,6 @@
 import { useStore } from "./stores";
 
-const api = (
+const api = <Result>(
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
   jwt: string | null,
@@ -20,16 +20,20 @@ const api = (
   }).then((response) =>
     response
       .json()
-      .then((payload) => (response.ok ? payload : Promise.reject(payload)))
+      .then((payload) =>
+        response.ok ? (payload as Result) : Promise.reject(payload)
+      )
   );
 
 export const useApi = () => {
   const { jwt } = useStore();
 
   return {
-    get: (url: string) => api(url, "GET", jwt),
-    post: (url: string, payload: any) => api(url, "POST", jwt, payload),
-    put: (url: string, payload: any) => api(url, "PUT", jwt, payload),
-    delete: (url: string) => api(url, "DELETE", jwt),
+    get: <Result>(url: string) => api<Result>(url, "GET", jwt),
+    post: <Result>(url: string, payload: any) =>
+      api<Result>(url, "POST", jwt, payload),
+    put: <Result>(url: string, payload: any) =>
+      api<Result>(url, "PUT", jwt, payload),
+    delete: <Result>(url: string) => api<Result>(url, "DELETE", jwt),
   };
 };
