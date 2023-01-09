@@ -35,9 +35,7 @@ const Subscriptions = ({ user }: Props) => {
       {items.map((item) => (
         <li key={item.id}>
           <div>
-            <Link href={`${window.location.pathname}/${item.id}`}>
-              {item.label}
-            </Link>
+            <Link href={`/feed/all/${item.id}`}>{item.label}</Link>
             <span>{item.publishedAt.toDateString()}</span>
           </div>
         </li>

@@ -16,7 +16,7 @@ const Item = ({ item }: Props) => (
       <span className={styles.date}></span>
       {item.description && (
         <div
-          className={styles.content}
+          className={styles.description}
           dangerouslySetInnerHTML={{ __html: item.description }}
         />
       )}
