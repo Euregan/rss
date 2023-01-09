@@ -11,10 +11,19 @@ const Nav = () => {
     <nav>
       <ul className={styles.menu}>
         <li>
-          Your feeds
+          Inbox
+          <span>
+            {subscriptions.reduce(
+              (total, feed) => total + feed.items.length,
+              0
+            )}
+          </span>
           <ul className={styles.subscriptions}>
             {subscriptions.map((feed) => (
-              <li key={feed.id}>{feed.label}</li>
+              <li key={feed.id}>
+                {feed.label}
+                <span>{feed.items.length}</span>
+              </li>
             ))}
           </ul>
         </li>
