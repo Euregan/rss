@@ -1,15 +1,22 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import rss, { refresh } from "../../../lib/rss";
+import database from "../../lib/database";
+import rss, { refresh } from "../../lib/rss";
 
 export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
+  if (process.env.NODE_ENV !== "development") {
+    return response.status(404).end();
+  }
+
   if (request.method === "GET") {
     try {
-      const { url } = request.query;
+      const feeds = await database.feed.findMany();
 
-      refresh(decodeURIComponent(url as string));
+      await Promise.all(
+        feeds.map(({ url }) => refresh(decodeURIComponent(url)))
+      );
 
       response.end();
     } catch (error) {
