@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import UserNav from "../ui/UserNav";
+import Nav from "../ui/Nav";
 
 interface Props {
   children: ReactNode;
@@ -10,11 +10,7 @@ const RootLayout = ({ children }: Props) => {
     <html>
       <head />
       <body>
-        <nav>
-          <ul>
-            <UserNav />
-          </ul>
-        </nav>
+        <Nav />
         {children}
       </body>
     </html>

@@ -1,12 +1,7 @@
-"use client";
-
-import { useStore } from "../lib/stores";
-import Subscriptions from "../ui/Subscriptions";
+import Layout from "../ui/Layout";
 
 const Page = () => {
-  const { user } = useStore();
-
-  return user ? <Subscriptions user={user} /> : <></>;
+  return <Layout />;
 };
 
 export default Page;

@@ -1,6 +1,6 @@
 import { useStore } from "./stores";
 
-const api = <Result>(
+export const api = <Result>(
   url: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
   jwt: string | null,
