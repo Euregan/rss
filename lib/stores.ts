@@ -43,9 +43,11 @@ export const useStore = create<UserState>()(
   )
 );
 
-// Synchronizing the store across tabs
-window.addEventListener("storage", (e: StorageEvent) => {
-  if (e.key === useStore.persist.getOptions().name && e.newValue) {
-    useStore.persist.rehydrate();
-  }
-});
+if (typeof window !== "undefined") {
+  // Synchronizing the store across tabs
+  window.addEventListener("storage", (e: StorageEvent) => {
+    if (e.key === useStore.persist.getOptions().name && e.newValue) {
+      useStore.persist.rehydrate();
+    }
+  });
+}
