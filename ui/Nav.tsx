@@ -2,16 +2,22 @@
 
 import Link from "next/link";
 import { useStore } from "../lib/stores";
+import styles from "./Nav.module.css";
 
 const Nav = () => {
   const { user, subscriptions } = useStore();
 
   return (
     <nav>
-      <ul>
-        {subscriptions.map((feed) => (
-          <li key={feed.id}>{feed.label}</li>
-        ))}
+      <ul className={styles.menu}>
+        <li>
+          Your feeds
+          <ul className={styles.subscriptions}>
+            {subscriptions.map((feed) => (
+              <li key={feed.id}>{feed.label}</li>
+            ))}
+          </ul>
+        </li>
         {!user && (
           <>
             <li>

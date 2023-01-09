@@ -1,0 +1,12 @@
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.subscriptions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}

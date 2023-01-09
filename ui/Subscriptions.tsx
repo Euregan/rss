@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useApi } from "../lib/api";
 import { User } from "../lib/types";
+import styles from "./Subscriptions.module.css";
 
 interface Props {
   user: User;
@@ -31,7 +32,7 @@ const Subscriptions = ({ user }: Props) => {
   return items === null ? (
     <>Loading</>
   ) : (
-    <ul>
+    <ul className={styles.subscriptions}>
       {items.map((item) => (
         <li key={item.id}>
           <div>
