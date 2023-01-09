@@ -22,7 +22,7 @@ const Signin = ({ redirect, onSignin }: Props) => {
     event.preventDefault();
 
     return api
-      .post("/api/signin", {
+      .post<{ token: string }>("/api/signin", {
         email,
         password,
       })

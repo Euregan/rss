@@ -1,8 +1,5 @@
 "use client";
 
-import { Item } from "@prisma/client";
-import { useEffect, useState } from "react";
-import { useApi } from "../../../../lib/api";
 import { useStore } from "../../../../lib/stores";
 import ItemDisplay from "../../../../ui/Item";
 import Layout from "../../../../ui/Layout";
@@ -13,22 +10,22 @@ interface Props {
 }
 
 const Page = ({ params }: Props) => {
-  const [item, setItem] = useState<Item | null>(null);
   const id = params.id;
-  const api = useApi();
-  const { user } = useStore();
+  const { subscriptions } = useStore();
 
-  useEffect(() => {
-    api
-      .get<Item>(`/api/items/${encodeURIComponent(id)}`)
-      .then((item) => ({ ...item, publishedAt: new Date(item.publishedAt) }))
-      .then(setItem);
-  }, [id]);
+  const items = subscriptions.flatMap(({ items }) => items);
+  const item = items.find((item) => item.id === id);
 
   return (
     <Layout
-      subscriptions={user ? <Subscriptions user={user} /> : <></>}
-      item={item ? <ItemDisplay item={item} /> : <>Loading</>}
+      subscriptions={<Subscriptions items={items} />}
+      item={
+        item ? (
+          <ItemDisplay item={item} />
+        ) : (
+          "There was an error loading this item"
+        )
+      }
     />
   );
 };

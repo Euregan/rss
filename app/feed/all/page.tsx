@@ -5,10 +5,14 @@ import Layout from "../../../ui/Layout";
 import Subscriptions from "../../../ui/Subscriptions";
 
 const Page = () => {
-  const { user } = useStore();
+  const { subscriptions } = useStore();
 
   return (
-    <Layout subscriptions={user ? <Subscriptions user={user} /> : <></>} />
+    <Layout
+      subscriptions={
+        <Subscriptions items={subscriptions.flatMap(({ items }) => items)} />
+      }
+    />
   );
 };
 

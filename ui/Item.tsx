@@ -1,4 +1,4 @@
-import type { Item } from "@prisma/client";
+import { Item } from "../lib/types";
 import styles from "./Item.module.css";
 
 interface Props {

@@ -1,8 +1,7 @@
-import type { User } from "./types";
+import type { Subscriptions, User } from "./types";
 import create from "zustand";
 import { persist } from "zustand/middleware";
 import jwt from "jsonwebtoken";
-import { Feed, Item } from "@prisma/client";
 import { api } from "./api";
 
 interface UserState {
@@ -10,7 +9,7 @@ interface UserState {
   jwt: string | null;
   login: (token: string) => void;
   logout: () => void;
-  subscriptions: Array<Feed & { items: Item[] }>;
+  subscriptions: Subscriptions;
   subscriptionsLoading: boolean;
 }
 
@@ -25,8 +24,8 @@ export const useStore = create<UserState>()(
           user: jwt.decode(token) as User,
         });
 
-        api<Array<Feed & { items: Item[] }>>("/api/feeds", "GET", token).then(
-          (subscriptions) => set({ subscriptions })
+        api<Subscriptions>("/api/feeds", "GET", token).then((subscriptions) =>
+          set({ subscriptions })
         );
       },
       logout: () => set({ jwt: null, user: null }),
@@ -35,13 +34,18 @@ export const useStore = create<UserState>()(
     }),
     {
       name: "rss",
-      onRehydrateStorage(state) {
-        return (state) => {
-          if (state?.jwt) {
-            state.login(state.jwt);
-          }
-        };
+      onRehydrateStorage: () => (state) => {
+        if (state?.jwt) {
+          state.login(state.jwt);
+        }
       },
     }
   )
 );
+
+// Synchronizing the store across tabs
+window.addEventListener("storage", (e: StorageEvent) => {
+  if (e.key === useStore.persist.getOptions().name && e.newValue) {
+    useStore.persist.rehydrate();
+  }
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, FormEventHandler, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "../lib/stores";
 import { useApi } from "../lib/api";
@@ -22,7 +22,7 @@ const Signup = ({ redirect, onSignup }: Props) => {
     event.preventDefault();
 
     return api
-      .post("/api/signup", {
+      .post<{ token: string }>("/api/signup", {
         email,
         password,
       })

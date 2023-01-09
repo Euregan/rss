@@ -1,19 +1,19 @@
 "use client";
 
-import type { Feed, Item } from "@prisma/client";
 import { FormEvent, useEffect, useState } from "react";
 import { useApi } from "../lib/api";
+import { Subscription } from "../lib/types";
 import FeedDisplay from "./Feed";
 
 const AddFeed = () => {
   const [url, setUrl] = useState("");
-  const [feed, setFeed] = useState<(Feed & { items: Item[] }) | null>(null);
+  const [feed, setFeed] = useState<Subscription | null>(null);
   const api = useApi();
 
   useEffect(() => {
     if (url) {
       api
-        .get<Feed & { items: Item[] }>(`/api/feeds/${encodeURIComponent(url)}`)
+        .get<Subscription>(`/api/feeds/${encodeURIComponent(url)}`)
         .then(setFeed);
     }
   }, [url]);

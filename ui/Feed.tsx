@@ -1,8 +1,8 @@
-import type { Feed, Item } from "@prisma/client";
+import { Subscription } from "../lib/types";
 import ItemDisplay from "./Item";
 
 interface Props {
-  feed: Feed & { items: Item[] };
+  feed: Subscription;
 }
 
 const Feed = ({ feed }: Props) => (
