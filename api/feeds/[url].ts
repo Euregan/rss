@@ -1,24 +1,24 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import database from "../../lib/database";
-import rss, { refresh } from "../../lib/rss";
+import rss, { addFeed } from "../../lib/rss";
 
 export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
-  if (process.env.NODE_ENV !== "development") {
-    return response.status(404).end();
-  }
-
   if (request.method === "GET") {
     try {
-      const feeds = await database.feed.findMany();
+      const { url } = request.query;
+      const parsedUrl = decodeURIComponent(url as string);
 
-      await Promise.all(
-        feeds.map(({ url }) => refresh(decodeURIComponent(url)))
-      );
+      let feed = await database.feed.findUnique({
+        where: {
+          url: parsedUrl,
+        },
+        include: { items: true },
+      });
 
-      response.end();
+      response.json(feed || (await addFeed(parsedUrl)));
     } catch (error) {
       console.error(error);
       response.status(500).json({ message: "Something wrong happened" });

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
-import database from "../../lib/database";
-import { User } from "../../lib/types";
+import database from "../lib/database";
+import { User } from "../lib/types";
 
 export default async function handler(
   request: NextApiRequest,
@@ -18,35 +18,51 @@ export default async function handler(
     ) as User | null;
 
     if (user) {
-      if (request.method === "GET") {
-        const feeds = await database.feed.findMany({
+      if (request.method === "POST") {
+        const { url } = request.body;
+
+        if (!url) {
+          return response
+            .status(400)
+            .json({ message: "You need to specify a URL" });
+        }
+
+        try {
+          await database.usersFeeds.create({
+            data: {
+              feed: {
+                connect: {
+                  url,
+                },
+              },
+              user: {
+                connect: {
+                  id: user.id,
+                },
+              },
+            },
+          });
+
+          return response.json({});
+        } catch (error) {
+          console.error(error);
+          response.status(500).json({ message: "Something wrong happened" });
+        }
+      } else if (request.method === "GET") {
+        const items = await database.item.findMany({
           where: {
             subscriptions: {
               some: {
                 AND: {
+                  readAt: null,
                   userId: user.id,
                 },
               },
             },
           },
-          include: {
-            items: {
-              where: {
-                subscriptions: {
-                  some: {
-                    AND: {
-                      readAt: null,
-                      userId: user.id,
-                    },
-                  },
-                },
-              },
-              orderBy: [{ publishedAt: "desc" }],
-            },
-          },
         });
 
-        return response.json(feeds);
+        return response.json(items);
       } else {
         response.status(405).json({ message: "Wrong method" });
       }

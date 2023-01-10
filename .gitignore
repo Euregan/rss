@@ -4,15 +4,14 @@
 /node_modules
 /.pnp
 .pnp.js
+elm-stuff
 
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
 # production
+/.parcel-cache
+/dist
 /build
 
 # misc
@@ -33,4 +32,4 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+

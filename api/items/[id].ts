@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import rss, { refresh } from "../../../lib/rss";
+import database from "../../lib/database";
 
 export default async function handler(
   request: NextApiRequest,
@@ -7,11 +7,15 @@ export default async function handler(
 ) {
   if (request.method === "GET") {
     try {
-      const { url } = request.query;
+      const { id } = request.query;
 
-      refresh(decodeURIComponent(url as string));
+      const item = await database.item.findUnique({
+        where: {
+          id: id as string,
+        },
+      });
 
-      response.end();
+      response.json(item);
     } catch (error) {
       console.error(error);
       response.status(500).json({ message: "Something wrong happened" });

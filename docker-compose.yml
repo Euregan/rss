@@ -18,11 +18,21 @@ services:
     volumes:
       - ./:/home/node/app
     ports:
+      - 1234:1234
+    command: npm run dev:app
+
+  server:
+    image: node:16
+    user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app
+    ports:
       - 3000:3000
     environment:
       DATABASE_URL: postgresql://rss:password@db:5432/rss
       JWT_SECRET: pouet
-    command: npm run dev
+    command: npm run dev:server
 
   prisma-studio:
     image: node:16
