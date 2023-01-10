@@ -97,6 +97,7 @@ export const addFeed = async (url: string) => {
       await fetch(process.env.CRON_SAAS_URL, {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.CRON_SAAS_API_KEY}`,
         },
         body: JSON.stringify({
