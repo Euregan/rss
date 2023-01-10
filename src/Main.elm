@@ -27,9 +27,10 @@ main =
 
 type alias Model =
     { key : Key
-    , url : Url
     , user : User
     , subscriptions : List Item
+    , feed : Maybe Feed
+    , item : Maybe Item
     }
 
 
@@ -39,11 +40,12 @@ type alias Flags =
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init flags url key =
+init flags _ key =
     ( { key = key
-      , url = url
       , user = User.init flags.jwt
       , subscriptions = []
+      , feed = Nothing
+      , item = Nothing
       }
     , case flags.jwt of
         Nothing ->
@@ -83,9 +85,31 @@ update msg model =
                     ( model, Browser.Navigation.load href )
 
         UrlChanged url ->
-            ( { model | url = url }
-            , Cmd.none
-            )
+            case model.user of
+                SignedOut ->
+                    ( model, Cmd.none )
+
+                Authenticated user ->
+                    case String.split "/" url.path of
+                        [ "", "feed", "all" ] ->
+                            ( { model | feed = Nothing, item = Nothing }
+                            , Cmd.none
+                            )
+
+                        [ "", "feed", feedId ] ->
+                            ( { model | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds, item = Nothing }
+                            , Cmd.none
+                            )
+
+                        [ "", "feed", _, itemId ] ->
+                            ( { model | item = List.head <| List.filter (\feed -> feed.id == itemId) model.subscriptions }
+                            , Cmd.none
+                            )
+
+                        _ ->
+                            ( model
+                            , Cmd.none
+                            )
 
         ReceveidFeeds (Err _) ->
             ( model, Cmd.none )
@@ -116,8 +140,8 @@ view : Model -> Document Msg
 view model =
     { title = "RSS"
     , body =
-        [ Nav.view model.url model.user
-        , Subscriptions.view model.url model.subscriptions
-        , Item.view <| List.head <| List.filter (\item -> String.contains item.id model.url.path) model.subscriptions
+        [ Nav.view model.feed model.user
+        , Subscriptions.view model.feed model.subscriptions
+        , Item.view model.item
         ]
     }

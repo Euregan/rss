@@ -3,29 +3,27 @@ module Nav exposing (..)
 import Feed exposing (Feed)
 import Html exposing (Html, a, li, nav, text, ul)
 import Html.Attributes exposing (class, href)
-import Url exposing (Url)
 import User exposing (User(..))
 
 
-view : Url -> User -> Html msg
-view url user =
+view : Maybe Feed -> User -> Html msg
+view maybeSelectedFeed user =
     let
         itemClass : Maybe Feed -> String
         itemClass maybeFeed =
-            case maybeFeed of
-                Nothing ->
-                    if String.startsWith "/feed/all" url.path then
+            case ( maybeFeed, maybeSelectedFeed ) of
+                ( Nothing, Nothing ) ->
+                    "active"
+
+                ( Just feed, Just selectedFeed ) ->
+                    if feed.id == selectedFeed.id then
                         "active"
 
                     else
                         ""
 
-                Just feed ->
-                    if String.contains feed.id url.path then
-                        "active"
-
-                    else
-                        ""
+                _ ->
+                    ""
     in
     nav [ class "pane" ]
         [ case user of
@@ -35,7 +33,7 @@ view url user =
             Authenticated { feeds } ->
                 ul [ class "menu" ] <|
                     li [ class <| itemClass Nothing ] [ a [ href "/feed/all" ] [ text "Inbox" ] ]
-                        :: List.map (\feed -> li [] [ a [ href <| "/feed/" ++ feed.id ] [ text feed.label ] ]) feeds
+                        :: List.map (\feed -> li [ class <| itemClass <| Just feed ] [ a [ href <| "/feed/" ++ feed.id ] [ text feed.label ] ]) feeds
         , case user of
             SignedOut ->
                 ul [ class "menu" ] []
