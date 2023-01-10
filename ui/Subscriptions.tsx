@@ -14,7 +14,10 @@ const Subscriptions = ({ items }: Props) => (
       <li
         key={item.id}
         className={
-          window.location.pathname.includes(item.id)
+          (typeof window !== "undefined"
+            ? window.location.pathname
+            : ""
+          ).includes(item.id)
             ? styles.active
             : styles.item
         }

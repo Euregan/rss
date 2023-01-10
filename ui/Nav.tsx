@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useStore } from "../lib/stores";
 import styles from "./Nav.module.css";
 
 const Nav = () => {
   const { user, subscriptions, logout } = useStore();
-  const pathname = window.location.pathname;
+  const pathname =
+    typeof window !== "undefined" ? window.location.pathname : "";
 
   return (
     <nav className={styles.nav}>
