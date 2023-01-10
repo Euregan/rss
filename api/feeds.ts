@@ -46,7 +46,15 @@ export default async function handler(
           },
         });
 
-        return response.json(feeds);
+        return response.json(
+          feeds.map((feed) => ({
+            ...feed,
+            items: feed.items.map((item) => ({
+              ...item,
+              publishedAt: new Date(item.publishedAt).getTime(),
+            })),
+          }))
+        );
       } else {
         response.status(405).json({ message: "Wrong method" });
       }

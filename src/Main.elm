@@ -3,10 +3,12 @@ module Main exposing (..)
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key)
 import Feed exposing (Feed)
-import Html exposing (text)
 import Http
+import Item exposing (Item)
 import Json.Decode
 import Nav
+import Subscriptions
+import Time
 import Url exposing (Url)
 import User exposing (User(..))
 
@@ -27,6 +29,7 @@ type alias Model =
     { key : Key
     , url : Url
     , user : User
+    , subscriptions : List Item
     }
 
 
@@ -40,21 +43,25 @@ init flags url key =
     ( { key = key
       , url = url
       , user = User.init flags.jwt
+      , subscriptions = []
       }
     , case flags.jwt of
         Nothing ->
             Cmd.none
 
         Just jwt ->
-            Http.request
-                { method = "GET"
-                , headers = [ Http.header "Authorization" <| "Bearer " ++ jwt ]
-                , url = "/api/feeds"
-                , body = Http.emptyBody
-                , expect = Http.expectJson ReceveidFeeds (Json.Decode.list Feed.decoder)
-                , timeout = Nothing
-                , tracker = Nothing
-                }
+            Cmd.batch
+                [ Http.request
+                    { method = "GET"
+                    , headers = [ Http.header "Authorization" <| "Bearer " ++ jwt ]
+                    , url = "/api/feeds"
+                    , body = Http.emptyBody
+                    , expect = Http.expectJson ReceveidFeeds (Json.Decode.list Feed.decoder)
+                    , timeout = Nothing
+                    , tracker = Nothing
+                    }
+                , Browser.Navigation.pushUrl key "/feed/all"
+                ]
     )
 
 
@@ -92,6 +99,9 @@ update msg model =
 
                         _ ->
                             model.user
+                , subscriptions =
+                    List.foldl (\feed acc -> List.concat [ feed.items, acc ]) [] feeds
+                        |> List.sortBy (\item -> Time.posixToMillis item.publishedAt)
               }
             , Cmd.none
             )
@@ -105,5 +115,9 @@ subscriptions _ =
 view : Model -> Document Msg
 view model =
     { title = "RSS"
-    , body = [ Nav.view model.user ]
+    , body =
+        [ Nav.view model.url model.user
+        , Subscriptions.view model.url model.subscriptions
+        , Item.view <| List.head <| List.filter (\item -> String.contains item.id model.url.path) model.subscriptions
+        ]
     }
