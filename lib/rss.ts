@@ -65,3 +65,52 @@ export const refresh = async (url: string) => {
     },
   });
 };
+
+export const addFeed = async (url: string) => {
+  const rawFeed = await rss.parseURL(url);
+
+  const feed = await database.feed.create({
+    data: {
+      url: url,
+      label: rawFeed.title || "", // TODO: Grab the title from the website if there is none in the feed
+      link: rawFeed.link,
+      picture: null, // TODO: Retrieve the image from the description if there is one
+      lastUpdated: new Date(),
+    },
+  });
+
+  await database.item.createMany({
+    data: rawFeed.items.map((item) => ({
+      itemId: item.guid as string,
+      label: item.title || "",
+      link: item.link,
+      description: item.content || item.summary,
+      picture: null,
+      publishedAt: new Date(item.isoDate as string),
+      feedId: feed.id,
+    })),
+    skipDuplicates: true,
+  });
+
+  if (process.env.CRON_SAAS_URL && process.env.CRON_SAAS_API_KEY) {
+    console.log(
+      await fetch(process.env.CRON_SAAS_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.CRON_SAAS_API_KEY}`,
+        },
+        body: JSON.stringify({
+          url: `${process.env.URL}/api/refresh/${encodeURIComponent(url)}`,
+          cron: `${Math.round(Math.random() * 59)} * * * *`,
+        }),
+      })
+    );
+  }
+
+  return await database.feed.findUnique({
+    where: {
+      id: feed.id,
+    },
+    include: { items: true },
+  });
+};
