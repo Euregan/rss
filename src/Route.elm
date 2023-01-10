@@ -12,7 +12,7 @@ import Url.Parser exposing ((</>), Parser, oneOf, s, string)
 type Route
     = Root
     | Feed String
-    | Item String String
+    | Item (Maybe String) String
 
 
 parser : Parser (Route -> a) a
@@ -20,8 +20,19 @@ parser =
     oneOf
         [ Url.Parser.map Root (s "feed" </> s "all")
         , Url.Parser.map Feed (s "feed" </> string)
-        , Url.Parser.map Item (s "feed" </> string </> string)
+        , Url.Parser.map Item (s "feed" </> feedParser </> string)
         ]
+
+
+feedParser : Parser (Maybe String -> a) a
+feedParser =
+    Url.Parser.custom "FEED" <|
+        \segment ->
+            if segment == "all" then
+                Just Nothing
+
+            else
+                Just (Just segment)
 
 
 
@@ -57,4 +68,4 @@ routeToPieces page =
             [ "feed", feed ]
 
         Item feed item ->
-            [ "feed", feed, item ]
+            [ "feed", Maybe.withDefault "all" feed, item ]

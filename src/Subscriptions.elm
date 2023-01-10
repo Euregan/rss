@@ -12,12 +12,7 @@ view maybeFeed items =
     let
         url : String -> Route
         url itemId =
-            case maybeFeed of
-                Nothing ->
-                    Route.Root
-
-                Just feed ->
-                    Route.Item feed.id itemId
+            Route.Item (Maybe.map .id maybeFeed) itemId
     in
     items
         |> List.map (\item -> li [] [ a [ Route.href <| url item.id ] [ text item.label ] ])

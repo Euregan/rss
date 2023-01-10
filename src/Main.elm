@@ -101,13 +101,13 @@ handleUrl url ( model, cmd ) =
                 cmd
             )
 
-        ( Authenticated user, Just (Route.Item feedId itemId) ) ->
+        ( Authenticated user, Just (Route.Item maybeFeedId itemId) ) ->
             let
                 maybeItem =
                     List.head <| List.filter (\feed -> feed.id == itemId) model.subscriptions
             in
             ( { model
-                | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds
+                | feed = Maybe.andThen (\feedId -> List.head <| List.filter (\feed -> feed.id == feedId) user.feeds) maybeFeedId
                 , item = maybeItem
               }
             , if maybeItem == Nothing then
