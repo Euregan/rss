@@ -103,7 +103,7 @@ export const addFeed = async (url: string) => {
           url: `${process.env.URL}/api/refresh/${encodeURIComponent(url)}`,
           cron: `${Math.round(Math.random() * 59)} * * * *`,
         }),
-      })
+      }).then((response) => response.json())
     );
   }
 
