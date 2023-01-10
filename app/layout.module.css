@@ -1,8 +1,9 @@
 .page {
   display: grid;
-  grid-template-columns: 17rem auto;
+  grid-template-columns: 12rem auto;
   margin: 0;
   height: 100vh;
   background: #111111;
   color: white;
+  font-size: 12px;
 }

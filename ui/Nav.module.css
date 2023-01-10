@@ -39,6 +39,10 @@
   justify-content: space-between;
 }
 
+.item {
+  color: #bbbbbb;
+}
+
 .item:hover {
   background-color: #222222;
 }

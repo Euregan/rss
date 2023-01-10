@@ -25,6 +25,10 @@
   background-color: #222222;
 }
 
+.item {
+  color: #bbbbbb;
+}
+
 .active {
   background-color: #000000;
 }
