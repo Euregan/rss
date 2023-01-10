@@ -1,6 +1,30 @@
 .subscriptions {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100vh;
+
+  padding: 1rem;
+
+  border-right: solid 2px #323232;
+}
+
+.item,
+.active {
+  padding: 0.6rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.item:hover {
+  background-color: #222222;
+}
+
+.active {
+  background-color: #000000;
 }

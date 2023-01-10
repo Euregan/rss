@@ -1,7 +1,12 @@
 .item {
-    overflow-y: auto;
+  overflow-y: auto;
+  padding: 1rem;
 }
 
 .description img {
-    max-width: 100%;
+  max-width: 100%;
+}
+
+.label {
+  margin: 0 0 1rem;
 }

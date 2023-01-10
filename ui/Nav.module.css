@@ -1,12 +1,48 @@
-.menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
+.nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+  border-right: solid 2px #323232;
 }
 
-.subscriptions {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subscriptions,
+.inbox {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.item,
+.active {
+  padding: 0.6rem;
+  border-radius: 5px;
+  cursor: pointer;
+
+  display: flex;
+  justify-content: space-between;
+}
+
+.item:hover {
+  background-color: #222222;
+}
+
+.active {
+  background-color: #000000;
 }
