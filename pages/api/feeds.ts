@@ -41,6 +41,7 @@ export default async function handler(
                   },
                 },
               },
+              orderBy: [{ publishedAt: "desc" }],
             },
           },
         });
