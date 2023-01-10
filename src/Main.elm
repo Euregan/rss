@@ -28,6 +28,7 @@ main =
 
 type alias Model =
     { key : Key
+    , url : Url
     , user : User
     , subscriptions : List Item
     , feed : Maybe Feed
@@ -43,6 +44,7 @@ type alias Flags =
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
 init flags url key =
     ( { key = key
+      , url = url
       , user = User.init flags.jwt
       , subscriptions = []
       , feed = Nothing
@@ -63,12 +65,65 @@ init flags url key =
                 , tracker = Nothing
                 }
     )
+        |> handleUrl url
 
 
 type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
     | ReceveidFeeds (Result Http.Error (List Feed))
+
+
+handleUrl : Url -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+handleUrl url ( model, cmd ) =
+    case ( model.user, Route.fromUrl url ) of
+        ( _, Just Route.Root ) ->
+            ( { model
+                | feed = Nothing
+                , item = Nothing
+              }
+            , cmd
+            )
+
+        ( Authenticated user, Just (Route.Feed feedId) ) ->
+            let
+                maybeFeed =
+                    List.head <| List.filter (\feed -> feed.id == feedId) user.feeds
+            in
+            ( { model
+                | feed = maybeFeed
+                , item = Nothing
+              }
+            , if maybeFeed == Nothing then
+                Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key "/feed/all" ]
+
+              else
+                cmd
+            )
+
+        ( Authenticated user, Just (Route.Item feedId itemId) ) ->
+            let
+                maybeItem =
+                    List.head <| List.filter (\feed -> feed.id == itemId) model.subscriptions
+            in
+            ( { model
+                | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds
+                , item = maybeItem
+              }
+            , if maybeItem == Nothing then
+                Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key "/feed/all" ]
+
+              else
+                cmd
+            )
+
+        _ ->
+            ( { model
+                | feed = Nothing
+                , item = Nothing
+              }
+            , Cmd.batch [ Browser.Navigation.pushUrl model.key "/feed/all", cmd ]
+            )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -83,43 +138,7 @@ update msg model =
                     ( model, Browser.Navigation.load href )
 
         UrlChanged url ->
-            case model.user of
-                SignedOut ->
-                    ( model, Cmd.none )
-
-                Authenticated user ->
-                    case Route.fromUrl url of
-                        Just Route.Root ->
-                            ( { model
-                                | feed = Nothing
-                                , item = Nothing
-                              }
-                            , Cmd.none
-                            )
-
-                        Just (Route.Feed feedId) ->
-                            ( { model
-                                | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds
-                                , item = Nothing
-                              }
-                            , Cmd.none
-                            )
-
-                        Just (Route.Item feedId itemId) ->
-                            ( { model
-                                | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds
-                                , item = List.head <| List.filter (\feed -> feed.id == itemId) model.subscriptions
-                              }
-                            , Cmd.none
-                            )
-
-                        _ ->
-                            ( { model
-                                | feed = Nothing
-                                , item = Nothing
-                              }
-                            , Browser.Navigation.pushUrl model.key "/feed/all"
-                            )
+            handleUrl url ( model, Cmd.none )
 
         ReceveidFeeds (Err _) ->
             ( model, Cmd.none )
