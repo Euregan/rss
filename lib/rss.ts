@@ -16,8 +16,21 @@ export const refresh = async (url: string) => {
     },
   });
 
+  const existingItems = await database.item.findMany({
+    where: {
+      feedId: feed.id,
+      itemId: {
+        in: rawFeed.items.map(({ guid }) => guid).filter((x) => x) as string[],
+      },
+    },
+  });
+
+  const itemsToCreate = rawFeed.items.filter(
+    (item) => !existingItems.some((existing) => existing.itemId !== item.guid)
+  );
+
   await database.item.createMany({
-    data: rawFeed.items.map((item) => ({
+    data: itemsToCreate.map((item) => ({
       itemId: item.guid as string,
       label: item.title || "",
       link: item.link,
