@@ -2,21 +2,23 @@ module Subscriptions exposing (..)
 
 import Feed exposing (Feed)
 import Html exposing (Html, a, li, text, ul)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class)
 import Item exposing (Item)
+import Route exposing (Route)
 
 
 view : Maybe Feed -> List Item -> Html msg
 view maybeFeed items =
     let
-        url =
+        url : String -> Route
+        url itemId =
             case maybeFeed of
                 Nothing ->
-                    "/feed/all/"
+                    Route.Root
 
                 Just feed ->
-                    "/feed/" ++ feed.id ++ "/"
+                    Route.Item feed.id itemId
     in
     items
-        |> List.map (\item -> li [] [ a [ href <| url ++ item.id ] [ text item.label ] ])
+        |> List.map (\item -> li [] [ a [ Route.href <| url item.id ] [ text item.label ] ])
         |> ul [ class "pane menu" ]

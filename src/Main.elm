@@ -7,6 +7,7 @@ import Http
 import Item exposing (Item)
 import Json.Decode
 import Nav
+import Route exposing (Route(..))
 import Subscriptions
 import Time
 import Url exposing (Url)
@@ -40,7 +41,7 @@ type alias Flags =
 
 
 init : Flags -> Url -> Key -> ( Model, Cmd Msg )
-init flags _ key =
+init flags url key =
     ( { key = key
       , user = User.init flags.jwt
       , subscriptions = []
@@ -52,18 +53,15 @@ init flags _ key =
             Cmd.none
 
         Just jwt ->
-            Cmd.batch
-                [ Http.request
-                    { method = "GET"
-                    , headers = [ Http.header "Authorization" <| "Bearer " ++ jwt ]
-                    , url = "/api/feeds"
-                    , body = Http.emptyBody
-                    , expect = Http.expectJson ReceveidFeeds (Json.Decode.list Feed.decoder)
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
-                , Browser.Navigation.pushUrl key "/feed/all"
-                ]
+            Http.request
+                { method = "GET"
+                , headers = [ Http.header "Authorization" <| "Bearer " ++ jwt ]
+                , url = "/api/feeds"
+                , body = Http.emptyBody
+                , expect = Http.expectJson ReceveidFeeds (Json.Decode.list Feed.decoder)
+                , timeout = Nothing
+                , tracker = Nothing
+                }
     )
 
 
@@ -90,25 +88,37 @@ update msg model =
                     ( model, Cmd.none )
 
                 Authenticated user ->
-                    case String.split "/" url.path of
-                        [ "", "feed", "all" ] ->
-                            ( { model | feed = Nothing, item = Nothing }
+                    case Route.fromUrl url of
+                        Just Route.Root ->
+                            ( { model
+                                | feed = Nothing
+                                , item = Nothing
+                              }
                             , Cmd.none
                             )
 
-                        [ "", "feed", feedId ] ->
-                            ( { model | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds, item = Nothing }
+                        Just (Route.Feed feedId) ->
+                            ( { model
+                                | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds
+                                , item = Nothing
+                              }
                             , Cmd.none
                             )
 
-                        [ "", "feed", _, itemId ] ->
-                            ( { model | item = List.head <| List.filter (\feed -> feed.id == itemId) model.subscriptions }
+                        Just (Route.Item feedId itemId) ->
+                            ( { model
+                                | feed = List.head <| List.filter (\feed -> feed.id == feedId) user.feeds
+                                , item = List.head <| List.filter (\feed -> feed.id == itemId) model.subscriptions
+                              }
                             , Cmd.none
                             )
 
                         _ ->
-                            ( model
-                            , Cmd.none
+                            ( { model
+                                | feed = Nothing
+                                , item = Nothing
+                              }
+                            , Browser.Navigation.pushUrl model.key "/feed/all"
                             )
 
         ReceveidFeeds (Err _) ->
