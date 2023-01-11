@@ -1,7 +1,15 @@
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../assets/FiraSans-Regular.ttf") format("opentype");
+  font-weight: 400;
+}
+
 html,
 body {
   margin: 0;
   font-size: 16px;
+  font-weight: 400;
+  font-family: "Fira Sans";
 }
 
 h1,
