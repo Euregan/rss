@@ -46,7 +46,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 1.5rem;
   overflow-y: auto;
 }
 
@@ -76,4 +76,13 @@ body {
 
 .menu > li.active > a {
   background-color: #000;
+}
+
+.item {
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.item img {
+  max-width: 100%;
 }

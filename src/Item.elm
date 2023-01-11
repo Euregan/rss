@@ -27,7 +27,7 @@ decoder =
 
 view : Maybe Item -> Html msg
 view maybeItem =
-    div [ class "pane" ] <|
+    div [ class "pane item" ] <|
         case maybeItem of
             Nothing ->
                 []
