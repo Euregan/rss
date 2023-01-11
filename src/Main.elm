@@ -95,7 +95,7 @@ handleUrl url ( model, cmd ) =
                 , item = Nothing
               }
             , if maybeFeed == Nothing then
-                Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key "/feed/all" ]
+                Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key <| Route.routeToString Route.Root ]
 
               else
                 cmd
@@ -111,7 +111,7 @@ handleUrl url ( model, cmd ) =
                 , item = maybeItem
               }
             , if maybeItem == Nothing then
-                Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key "/feed/all" ]
+                Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key <| Route.routeToString Route.Root ]
 
               else
                 cmd
@@ -122,7 +122,7 @@ handleUrl url ( model, cmd ) =
                 | feed = Nothing
                 , item = Nothing
               }
-            , Cmd.batch [ Browser.Navigation.pushUrl model.key "/feed/all", cmd ]
+            , Cmd.batch [ Browser.Navigation.pushUrl model.key <| Route.routeToString Route.Root, cmd ]
             )
 
 
