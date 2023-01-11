@@ -170,7 +170,7 @@ view model =
     { title = "RSS"
     , body =
         [ Nav.view model.feed model.user
-        , Subscriptions.view model.feed model.subscriptions
+        , Subscriptions.view model.feed model.item model.subscriptions
         , Item.view model.item
         ]
     }
