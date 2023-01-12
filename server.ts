@@ -16,18 +16,18 @@ const buildTree = async (path: string): Promise<Array<[string, Handler]>> =>
           return [
             [
               filepath
-                .replace(/^\./, "")
+                .replace(/^\.\/src/, "")
                 .replace(/\.ts$/, "")
                 .replace(/\[/, ":")
                 .replace(/\]/, ""),
-              (await import(filepath)).default.default,
+              (await import(filepath)).default,
             ],
           ];
         }
       })
   ).then((x) => x.flatMap((x) => x));
 
-buildTree("./api").then((api) => {
+buildTree("./src/api").then((api) => {
   const app = express();
   const port = 3000;
 
