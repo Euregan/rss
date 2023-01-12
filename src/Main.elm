@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key)
@@ -6,6 +6,7 @@ import Feed exposing (Feed)
 import Http
 import Item exposing (Item)
 import Json.Decode
+import Json.Encode
 import Nav
 import Route exposing (Route(..))
 import Subscriptions
@@ -156,7 +157,7 @@ update msg model =
                     List.foldl (\feed acc -> List.concat [ feed.items, acc ]) [] feeds
                         |> List.sortBy (\item -> Time.posixToMillis item.publishedAt)
               }
-            , Cmd.none
+            , feedsUpdated <| Json.Encode.list Feed.encode feeds
             )
 
 
@@ -174,3 +175,9 @@ view model =
         , Item.view model.item
         ]
     }
+
+
+port feedsUpdated : Json.Encode.Value -> Cmd msg
+
+
+port messageReceiver : (String -> msg) -> Sub msg

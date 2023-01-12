@@ -5,6 +5,7 @@ import Html.Attributes exposing (class)
 import Html.Parser
 import Html.Parser.Util
 import Json.Decode exposing (Decoder)
+import Json.Encode
 import Time exposing (Posix)
 
 
@@ -23,6 +24,16 @@ decoder =
         (Json.Decode.field "label" Json.Decode.string)
         (Json.Decode.field "publishedAt" <| Json.Decode.map Time.millisToPosix Json.Decode.int)
         (Json.Decode.field "description" Json.Decode.string)
+
+
+encode : Item -> Json.Encode.Value
+encode item =
+    Json.Encode.object
+        [ ( "id", Json.Encode.string item.id )
+        , ( "label", Json.Encode.string item.label )
+        , ( "publishedAt", Json.Encode.int <| Time.posixToMillis item.publishedAt )
+        , ( "description", Json.Encode.string item.description )
+        ]
 
 
 view : Maybe Item -> Html msg
