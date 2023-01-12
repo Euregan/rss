@@ -1,11 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { Request, Response } from "express";
 import database from "../../lib/database";
 import rss, { addFeed } from "../../lib/rss";
 
-export default async function handler(
-  request: NextApiRequest,
-  response: NextApiResponse
-) {
+export default async function handler(request: Request, response: Response) {
   if (request.method === "GET") {
     try {
       const { url } = request.query;

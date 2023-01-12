@@ -1,12 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import database from "../lib/database";
 import { User } from "../lib/types";
 
-export default async function handler(
-  request: NextApiRequest,
-  response: NextApiResponse
-) {
+export default async function handler(request: Request, response: Response) {
   const token =
     request.headers.authorization &&
     request.headers.authorization.split("Bearer ")[1];

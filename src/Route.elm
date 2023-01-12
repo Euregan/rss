@@ -1,6 +1,5 @@
 module Route exposing (..)
 
-import Browser.Navigation
 import Feed exposing (Feed)
 import Html exposing (Attribute)
 import Html.Attributes as Attr

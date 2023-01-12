@@ -1,12 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { Request, Response } from "express";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import database from "../lib/database";
 
-export default async function handler(
-  request: NextApiRequest,
-  response: NextApiResponse
-) {
+export default async function handler(request: Request, response: Response) {
   if (request.method === "POST") {
     const { email, password } = request.body;
 
