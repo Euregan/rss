@@ -4,6 +4,12 @@
   font-weight: 400;
 }
 
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../assets/FiraSans-SemiBold.ttf") format("opentype");
+  font-weight: 600;
+}
+
 html,
 body {
   margin: 0;
@@ -84,6 +90,15 @@ body {
   gap: 1rem;
 }
 
+.item > h3 {
+  font-size: 24px;
+}
+
 .item img {
   max-width: 100%;
+}
+
+.item a {
+  font-weight: 600;
+  text-decoration: underline;
 }
