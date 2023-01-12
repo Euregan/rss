@@ -1,5 +1,6 @@
 module Feed exposing (..)
 
+import Http
 import Item exposing (Item)
 import Json.Decode exposing (Decoder)
 import Json.Encode
@@ -10,6 +11,19 @@ type alias Feed =
     , label : String
     , items : List Item
     }
+
+
+fetch : String -> (Result Http.Error (List Feed) -> msg) -> Cmd msg
+fetch jwt onFeedsReceived =
+    Http.request
+        { method = "GET"
+        , headers = [ Http.header "Authorization" <| "Bearer " ++ jwt ]
+        , url = "/api/feeds"
+        , body = Http.emptyBody
+        , expect = Http.expectJson onFeedsReceived (Json.Decode.list decoder)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 decoder : Decoder Feed

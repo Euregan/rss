@@ -1,5 +1,6 @@
 import fs from "fs";
 import express from "express";
+import bodyParser from "body-parser";
 import type { Request, Response } from "express";
 
 type Handler = (request: Request, response: Response) => Promise<void>;
@@ -30,6 +31,8 @@ const buildTree = async (path: string): Promise<Array<[string, Handler]>> =>
 buildTree("./src/api").then((api) => {
   const app = express();
   const port = 3000;
+
+  app.use(bodyParser.json());
 
   api.forEach(([route, handler]) => app.all(route, handler));
 

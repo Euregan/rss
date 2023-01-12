@@ -4,7 +4,7 @@ import Feed exposing (Feed)
 
 
 type User
-    = SignedOut
+    = SignedOut String String Bool
     | Authenticated
         { jwt : String
         , feeds : List Feed
@@ -15,7 +15,7 @@ init : Maybe String -> User
 init maybeJwt =
     case maybeJwt of
         Nothing ->
-            SignedOut
+            SignedOut "" "" False
 
         Just jwt ->
             Authenticated

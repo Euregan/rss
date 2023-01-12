@@ -28,7 +28,7 @@ view maybeSelectedFeed user =
     in
     nav [ class "pane" ]
         [ case user of
-            SignedOut ->
+            SignedOut _ _ _ ->
                 ul [ class "menu" ] []
 
             Authenticated { feeds } ->
@@ -51,7 +51,7 @@ view maybeSelectedFeed user =
                             )
                             feeds
         , case user of
-            SignedOut ->
+            SignedOut _ _ _ ->
                 ul [ class "menu" ] []
 
             Authenticated _ ->

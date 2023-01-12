@@ -1,12 +1,15 @@
 port module Main exposing (..)
 
+import Authentication
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation exposing (Key)
 import Feed exposing (Feed)
+import Html exposing (text)
 import Http
 import Item exposing (Item)
 import Json.Decode
 import Json.Encode
+import Modal
 import Nav
 import Route exposing (Route(..))
 import Subscriptions
@@ -56,15 +59,7 @@ init flags url key =
             Cmd.none
 
         Just jwt ->
-            Http.request
-                { method = "GET"
-                , headers = [ Http.header "Authorization" <| "Bearer " ++ jwt ]
-                , url = "/api/feeds"
-                , body = Http.emptyBody
-                , expect = Http.expectJson ReceveidFeeds (Json.Decode.list Feed.decoder)
-                , timeout = Nothing
-                , tracker = Nothing
-                }
+            Feed.fetch jwt ReceveidFeeds
     )
         |> handleUrl url
 
@@ -73,6 +68,10 @@ type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
     | ReceveidFeeds (Result Http.Error (List Feed))
+    | OnAuthenticationEmailChange String
+    | OnAuthenticationPasswordChange String
+    | OnAuthenticationSubmit
+    | OnAuthenticated (Result Http.Error String)
 
 
 handleUrl : Url -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -160,6 +159,40 @@ update msg model =
             , feedsUpdated <| Json.Encode.list Feed.encode feeds
             )
 
+        OnAuthenticationEmailChange email ->
+            case model.user of
+                SignedOut _ password False ->
+                    ( { model | user = SignedOut email password False }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        OnAuthenticationPasswordChange password ->
+            case model.user of
+                SignedOut email _ False ->
+                    ( { model | user = SignedOut email password False }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        OnAuthenticationSubmit ->
+            case model.user of
+                SignedOut email password False ->
+                    ( { model | user = SignedOut email password True }
+                    , Authentication.authenticate email password OnAuthenticated
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        OnAuthenticated (Err _) ->
+            ( model, Cmd.none )
+
+        OnAuthenticated (Ok jwt) ->
+            ( { model | user = User.Authenticated { jwt = jwt, feeds = [] } }
+            , Feed.fetch jwt ReceveidFeeds
+            )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
@@ -173,11 +206,21 @@ view model =
         [ Nav.view model.feed model.user
         , Subscriptions.view model.feed model.item model.subscriptions
         , Item.view model.item
+        , case model.user of
+            SignedOut email password loading ->
+                Modal.view <|
+                    Authentication.view
+                        loading
+                        email
+                        password
+                        OnAuthenticationEmailChange
+                        OnAuthenticationPasswordChange
+                        OnAuthenticationSubmit
+
+            _ ->
+                text ""
         ]
     }
 
 
 port feedsUpdated : Json.Encode.Value -> Cmd msg
-
-
-port messageReceiver : (String -> msg) -> Sub msg
