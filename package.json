@@ -2,10 +2,11 @@
   "name": "rss",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev:app": "parcel src/index.html",
     "dev:server": "nodemon --ext ts --exec \"node -r esbuild-register --loader @esbuild-kit/esm-loader server.ts\"",
-    "build": "parcel build src/index.html && cp -R api dist/api"
+    "build": "parcel build src/index.html && cp -R src/api dist/api"
   },
   "dependencies": {
     "@prisma/client": "^4.8.1",

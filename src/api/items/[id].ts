@@ -1,21 +1,18 @@
 import type { Request, Response } from "express";
-import database from "../lib/database";
-import rss, { refresh } from "../lib/rss";
+import database from "../../../lib/database";
 
 export default async function handler(request: Request, response: Response) {
-  if (process.env.NODE_ENV !== "development") {
-    return response.status(404).end();
-  }
-
   if (request.method === "GET") {
     try {
-      const feeds = await database.feed.findMany();
+      const { id } = request.query;
 
-      await Promise.all(
-        feeds.map(({ url }) => refresh(decodeURIComponent(url)))
-      );
+      const item = await database.item.findUnique({
+        where: {
+          id: id as string,
+        },
+      });
 
-      response.end();
+      response.json(item);
     } catch (error) {
       console.error(error);
       response.status(500).json({ message: "Something wrong happened" });

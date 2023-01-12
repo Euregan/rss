@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import database from "../lib/database";
-import { User } from "../lib/types";
+import database from "../../lib/database";
+import { User } from "../../lib/types";
 
 export default async function handler(request: Request, response: Response) {
   const token =
