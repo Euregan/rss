@@ -32,6 +32,7 @@ services:
     environment:
       DATABASE_URL: postgresql://rss:password@db:5432/rss
       JWT_SECRET: pouet
+      NODE_ENV: development
     command: npm run dev:server
 
   prisma-studio:

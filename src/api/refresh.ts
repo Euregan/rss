@@ -11,9 +11,7 @@ export default async function handler(request: Request, response: Response) {
     try {
       const feeds = await database.feed.findMany();
 
-      await Promise.all(
-        feeds.map(({ url }) => refresh(decodeURIComponent(url)))
-      );
+      await Promise.all(feeds.map(({ url }) => refresh(url)));
 
       response.end();
     } catch (error) {

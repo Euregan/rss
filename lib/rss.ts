@@ -26,8 +26,12 @@ export const refresh = async (url: string) => {
   });
 
   const itemsToCreate = rawFeed.items.filter(
-    (item) => !existingItems.some((existing) => existing.itemId !== item.guid)
+    (item) => !existingItems.some((existing) => existing.itemId === item.guid)
   );
+
+  if (itemsToCreate.length === 0) {
+    return;
+  }
 
   await database.item.createMany({
     data: itemsToCreate.map((item) => ({
