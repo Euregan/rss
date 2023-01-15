@@ -11,3 +11,8 @@ app.ports.feedsUpdated.subscribe((subscriptions: any) => {
   const stored = JSON.parse(localStorage.getItem("rss") || "{}");
   localStorage.setItem("rss", JSON.stringify({ ...stored, subscriptions }));
 });
+
+app.ports.jwtUpdated.subscribe((jwt: string) => {
+  const stored = JSON.parse(localStorage.getItem("rss") || "{}");
+  localStorage.setItem("rss", JSON.stringify({ ...stored, jwt }));
+});

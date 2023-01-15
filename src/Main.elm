@@ -7,7 +7,6 @@ import Feed exposing (Feed)
 import Html exposing (text)
 import Http
 import Item exposing (Item)
-import Json.Decode
 import Json.Encode
 import Modal
 import Nav
@@ -190,7 +189,10 @@ update msg model =
 
         OnAuthenticated (Ok jwt) ->
             ( { model | user = User.Authenticated { jwt = jwt, feeds = [] } }
-            , Feed.fetch jwt ReceveidFeeds
+            , Cmd.batch
+                [ Feed.fetch jwt ReceveidFeeds
+                , jwtUpdated jwt
+                ]
             )
 
 
@@ -224,3 +226,6 @@ view model =
 
 
 port feedsUpdated : Json.Encode.Value -> Cmd msg
+
+
+port jwtUpdated : String -> Cmd msg
