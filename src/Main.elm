@@ -154,6 +154,7 @@ update msg model =
                 , subscriptions =
                     List.foldl (\feed acc -> List.concat [ feed.items, acc ]) [] feeds
                         |> List.sortBy (\item -> Time.posixToMillis item.publishedAt)
+                        |> List.reverse
               }
             , feedsUpdated <| Json.Encode.list Feed.encode feeds
             )
