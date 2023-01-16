@@ -4,6 +4,7 @@ import Html exposing (Html, div, h3, text)
 import Html.Attributes exposing (class)
 import Html.Parser
 import Html.Parser.Util
+import Http
 import Json.Decode exposing (Decoder)
 import Json.Encode
 import Time exposing (Posix)
@@ -15,6 +16,19 @@ type alias Item =
     , publishedAt : Posix
     , description : String
     }
+
+
+saveRead : String -> Item -> (Result Http.Error Posix -> msg) -> Cmd msg
+saveRead jwt item onFeedsReceived =
+    Http.request
+        { method = "PUT"
+        , headers = [ Http.header "Authorization" <| "Bearer " ++ jwt ]
+        , url = "/api/items/" ++ item.id
+        , body = Http.emptyBody
+        , expect = Http.expectJson onFeedsReceived (Json.Decode.field "readAt" <| Json.Decode.map Time.millisToPosix Json.Decode.int)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
 decoder : Decoder Item

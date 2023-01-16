@@ -67,6 +67,7 @@ type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
     | ReceveidFeeds (Result Http.Error (List Feed))
+    | ItemRead (Result Http.Error Time.Posix)
     | OnAuthenticationEmailChange String
     | OnAuthenticationPasswordChange String
     | OnAuthenticationSubmit
@@ -109,11 +110,18 @@ handleUrl url ( model, cmd ) =
                 | feed = Maybe.andThen (\feedId -> List.head <| List.filter (\feed -> feed.id == feedId) user.feeds) maybeFeedId
                 , item = maybeItem
               }
-            , if maybeItem == Nothing then
-                Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key <| Route.routeToString Route.Root ]
+            , case maybeItem of
+                Nothing ->
+                    Cmd.batch
+                        [ cmd
+                        , Browser.Navigation.pushUrl model.key <| Route.routeToString Route.Root
+                        ]
 
-              else
-                cmd
+                Just item ->
+                    Cmd.batch
+                        [ cmd
+                        , Item.saveRead user.jwt item ItemRead
+                        ]
             )
 
         _ ->
@@ -195,6 +203,9 @@ update msg model =
                 , jwtUpdated jwt
                 ]
             )
+
+        ItemRead _ ->
+            ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
