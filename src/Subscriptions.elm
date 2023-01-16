@@ -27,6 +27,12 @@ view maybeFeed maybeSelectedItem items =
                     else
                         ""
     in
-    items
+    (case maybeFeed of
+        Nothing ->
+            items
+
+        Just feed ->
+            feed.items
+    )
         |> List.map (\item -> li [ class <| itemClass item ] [ a [ Route.href <| url item.id ] [ text item.label ] ])
         |> ul [ class "pane menu" ]
