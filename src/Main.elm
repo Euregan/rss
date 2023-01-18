@@ -76,11 +76,34 @@ type Msg
 
 handleUrl : Url -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 handleUrl url ( model, cmd ) =
-    case ( model.user, Route.fromUrl url ) of
+    let
+        ( updatedItems, updatedUser ) =
+            case model.item of
+                Nothing ->
+                    ( model.subscriptions, model.user )
+
+                Just item ->
+                    ( model.subscriptions |> List.filter (\i -> i.id /= item.id)
+                    , case model.user of
+                        Authenticated { jwt, feeds } ->
+                            Authenticated
+                                { jwt = jwt
+                                , feeds =
+                                    feeds
+                                        |> List.map (\feed -> { feed | items = List.filter (\i -> i.id /= item.id) feed.items })
+                                }
+
+                        _ ->
+                            model.user
+                    )
+    in
+    case ( updatedUser, Route.fromUrl url ) of
         ( _, Just Route.Root ) ->
             ( { model
                 | feed = Nothing
                 , item = Nothing
+                , subscriptions = updatedItems
+                , user = updatedUser
               }
             , cmd
             )
@@ -93,6 +116,8 @@ handleUrl url ( model, cmd ) =
             ( { model
                 | feed = maybeFeed
                 , item = Nothing
+                , subscriptions = updatedItems
+                , user = updatedUser
               }
             , if maybeFeed == Nothing then
                 Cmd.batch [ cmd, Browser.Navigation.pushUrl model.key <| Route.routeToString Route.Root ]
@@ -109,6 +134,8 @@ handleUrl url ( model, cmd ) =
             ( { model
                 | feed = Maybe.andThen (\feedId -> List.head <| List.filter (\feed -> feed.id == feedId) user.feeds) maybeFeedId
                 , item = maybeItem
+                , subscriptions = updatedItems
+                , user = updatedUser
               }
             , case maybeItem of
                 Nothing ->
