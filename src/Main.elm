@@ -1,12 +1,15 @@
 port module Main exposing (..)
 
+import Array
 import Authentication
 import Browser exposing (Document, UrlRequest)
-import Browser.Navigation exposing (Key)
+import Browser.Events
+import Browser.Navigation
 import Feed exposing (Feed)
 import Html exposing (text)
 import Http
 import Item exposing (Item)
+import Json.Decode
 import Json.Encode
 import Modal
 import Nav
@@ -30,7 +33,7 @@ main =
 
 
 type alias Model =
-    { key : Key
+    { key : Browser.Navigation.Key
     , url : Url
     , user : User
     , subscriptions : List Item
@@ -44,7 +47,7 @@ type alias Flags =
     }
 
 
-init : Flags -> Url -> Key -> ( Model, Cmd Msg )
+init : Flags -> Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
 init flags url key =
     ( { key = key
       , url = url
@@ -63,6 +66,12 @@ init flags url key =
         |> handleUrl url
 
 
+type Key
+    = ArrowLeft
+    | ArrowRight
+    | Other
+
+
 type Msg
     = LinkClicked UrlRequest
     | UrlChanged Url
@@ -72,6 +81,7 @@ type Msg
     | OnAuthenticationPasswordChange String
     | OnAuthenticationSubmit
     | OnAuthenticated (Result Http.Error String)
+    | OnKeyUp Key
 
 
 handleUrl : Url -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -234,10 +244,98 @@ update msg model =
         ItemRead _ ->
             ( model, Cmd.none )
 
+        OnKeyUp key ->
+            let
+                find :
+                    Item
+                    -> List Item
+                    -> ((Item -> ( Maybe Item, Maybe Item ) -> ( Maybe Item, Maybe Item )) -> ( Maybe Item, Maybe Item ) -> List Item -> ( Maybe Item, Maybe Item ))
+                    -> Maybe Item
+                find item items fold =
+                    fold
+                        (\i ( previous, found ) ->
+                            if i.id == item.id then
+                                ( Just i, previous )
+
+                            else
+                                ( Just i, found )
+                        )
+                        ( Nothing, Nothing )
+                        items
+                        |> Tuple.second
+            in
+            case ( key, model.user, model.item ) of
+                ( ArrowLeft, Authenticated _, Just item ) ->
+                    case model.feed of
+                        Nothing ->
+                            case find item model.subscriptions List.foldl |> Debug.log "ugh" of
+                                Nothing ->
+                                    ( model, Cmd.none )
+
+                                Just nextItem ->
+                                    ( model
+                                    , Browser.Navigation.pushUrl
+                                        model.key
+                                        (Route.routeToString <| Route.Item Nothing nextItem.id)
+                                    )
+
+                        Just feed ->
+                            case find item feed.items List.foldl of
+                                Nothing ->
+                                    ( model, Cmd.none )
+
+                                Just nextItem ->
+                                    ( model
+                                    , Browser.Navigation.pushUrl
+                                        model.key
+                                        (Route.routeToString <| Route.Item (Just feed.id) nextItem.id)
+                                    )
+
+                ( ArrowRight, Authenticated _, Just item ) ->
+                    case model.feed of
+                        Nothing ->
+                            case find item model.subscriptions List.foldr |> Debug.log "ugh" of
+                                Nothing ->
+                                    ( model, Cmd.none )
+
+                                Just nextItem ->
+                                    ( model
+                                    , Browser.Navigation.pushUrl
+                                        model.key
+                                        (Route.routeToString <| Route.Item Nothing nextItem.id)
+                                    )
+
+                        Just feed ->
+                            case find item feed.items List.foldr of
+                                Nothing ->
+                                    ( model, Cmd.none )
+
+                                Just nextItem ->
+                                    ( model
+                                    , Browser.Navigation.pushUrl
+                                        model.key
+                                        (Route.routeToString <| Route.Item (Just feed.id) nextItem.id)
+                                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    let
+        toDirection string =
+            case string of
+                "ArrowLeft" ->
+                    OnKeyUp ArrowLeft
+
+                "ArrowRight" ->
+                    OnKeyUp ArrowRight
+
+                _ ->
+                    OnKeyUp Other
+    in
+    Browser.Events.onKeyUp (Json.Decode.map toDirection (Json.Decode.field "key" Json.Decode.string))
 
 
 view : Model -> Document Msg
